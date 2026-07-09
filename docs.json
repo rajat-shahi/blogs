@@ -1,0 +1,165 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "maple",
+  "name": "Rajat's Engineering Blog",
+  "colors": {
+    "primary": "#555240",
+    "light": "#C7C099",
+    "dark": "#555240"
+  },
+  "background": {
+    "decoration": "gradient",
+    "color": {
+      "light": "#F5F4F0",
+      "dark": "#0A0A08"
+    }
+  },
+  "fonts": {
+    "heading": {
+      "family": "Inter",
+      "weight": 600
+    },
+    "body": {
+      "family": "Inter",
+      "weight": 400
+    }
+  },
+  "icons": {
+    "library": "lucide"
+  },
+  "styling": {
+    "eyebrows": "breadcrumbs"
+  },
+  "favicon": "/logo/rajat-engineering-blog.png",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "icon": "book-open",
+        "groups": [
+          {
+            "group": "Home",
+            "icon": "house",
+            "pages": [
+              "index"
+            ]
+          },
+          {
+            "group": "System Design",
+            "icon": "network",
+            "pages": [
+              "system-design/overview"
+            ]
+          },
+          {
+            "group": "Competitive Programming / DSA",
+            "icon": "code",
+            "pages": [
+              "dsa/overview"
+            ]
+          },
+          {
+            "group": "Frontend Engineering",
+            "icon": "monitor",
+            "pages": [
+              "frontend-engineering/overview"
+            ]
+          },
+          {
+            "group": "Backend Engineering",
+            "icon": "server",
+            "pages": [
+              "backend-engineering/overview"
+            ]
+          },
+          {
+            "group": "Full Stack Engineering",
+            "icon": "layers",
+            "pages": [
+              "fullstack-engineering/overview"
+            ]
+          },
+          {
+            "group": "Site Reliability Engineering",
+            "icon": "activity",
+            "pages": [
+              "sre/overview"
+            ]
+          },
+          {
+            "group": "DevOps Engineering",
+            "icon": "infinity",
+            "pages": [
+              "devops-engineering/overview",
+              "devops-engineering/linux-basics"
+            ]
+          },
+          {
+            "group": "AI Engineering",
+            "icon": "brain-circuit",
+            "pages": [
+              "ai-engineering/overview"
+            ]
+          },
+          {
+            "group": "MLOps/AIOps",
+            "icon": "workflow",
+            "pages": [
+              "mlops-aiops/overview"
+            ]
+          },
+          {
+            "group": "Other Learnings",
+            "icon": "book-open",
+            "pages": [
+              "other-learnings/overview",
+              "other-learnings/redis-memory-analyzer-clusters"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Projects/Tinkering",
+        "icon": "flask-conical",
+        "groups": [
+          {
+            "group": "Projects",
+            "icon": "flask-conical",
+            "pages": [
+              "projects/overview"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Roadmap/Learning Goals",
+        "icon": "map",
+        "groups": [
+          {
+            "group": "Roadmap",
+            "icon": "map",
+            "pages": [
+              "roadmap/overview"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "logo": {
+    "light": "/logo/rajat-engineering-blog.png",
+    "dark": "/logo/rajat-engineering-blog.png"
+  },
+  "contextual": {
+    "options": [
+      "copy",
+      "view",
+      "chatgpt",
+      "claude",
+      "mcp",
+      "cursor",
+      "vscode"
+    ],
+    "display": "header"
+  }
+}
