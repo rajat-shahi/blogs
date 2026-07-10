@@ -1,0 +1,14 @@
+{
+  "name": "blogs",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build:sites-worker": "vite build --config sites/vite.config.ts"
+  },
+  "devDependencies": {
+    "@cloudflare/vite-plugin": "1.37.1",
+    "vite": "8.0.13",
+    "wrangler": "4.92.0"
+  }
+}

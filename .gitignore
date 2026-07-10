@@ -1,4 +1,6 @@
 .claude/
 dist/
 .sites/
+.wrangler/
+node_modules/
 *.log

@@ -1,4 +1,8 @@
-function withHeaders(response) {
+interface Env {
+  ASSETS: Fetcher;
+}
+
+function withHeaders(response: Response): Response {
   const headers = new Headers(response.headers);
   headers.set("X-Content-Type-Options", "nosniff");
   headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
@@ -10,15 +14,8 @@ function withHeaders(response) {
   });
 }
 
-async function fetchAsset(request, env, pathname) {
-  const url = new URL(request.url);
-  url.pathname = pathname;
-  return env.ASSETS.fetch(new Request(url, request));
-}
-
 export default {
-  async fetch(request, env) {
-    const url = new URL(request.url);
+  async fetch(request: Request, env: Env): Promise<Response> {
     let response = await env.ASSETS.fetch(request);
 
     if (response.status !== 404) {
@@ -29,10 +26,11 @@ export default {
       return withHeaders(response);
     }
 
-    const pathname = url.pathname.endsWith("/")
+    const url = new URL(request.url);
+    url.pathname = url.pathname.endsWith("/")
       ? `${url.pathname}index.html`
       : `${url.pathname}/index.html`;
-    response = await fetchAsset(request, env, pathname);
+    response = await env.ASSETS.fetch(new Request(url, request));
 
     return withHeaders(response);
   },
