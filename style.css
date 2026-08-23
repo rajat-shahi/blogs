@@ -11,6 +11,8 @@
   --light-muted: #000000;
   --light-border: #d8e0e6;
   --light-accent: #3f716a;
+  --dark-text: #ffffff;
+  --dark-muted: #f1f3f5;
 }
 
 body,
@@ -44,6 +46,18 @@ body,
 
 .dark #sidebar {
   border-right-color: rgb(255 255 255 / 0.07);
+}
+
+.dark body,
+.dark #content-container,
+.dark #content-area,
+.dark #content-side-layout,
+.dark #table-of-contents-layout,
+.dark #sidebar,
+.dark #navbar,
+.dark #navbar-transition,
+.dark #navbar-transition-maple {
+  color: var(--dark-text);
 }
 
 html:not(.dark),
@@ -109,7 +123,7 @@ html:not(.dark) #navbar-transition-maple {
 }
 
 .dark #sidebar-content a[href="/"]::after {
-  color: #f3f4f6 !important;
+  color: var(--dark-text) !important;
 }
 
 #sidebar-content a[href]:not([href="/"]) {
@@ -127,6 +141,14 @@ html:not(.dark) #sidebar-content a[href]:not([href="/"]):hover {
   background: var(--light-surface-muted) !important;
 }
 
+.dark #sidebar-content a[href]:not([href="/"]) {
+  color: var(--dark-muted) !important;
+}
+
+.dark #sidebar-content a[href]:not([href="/"]):hover {
+  color: var(--dark-text) !important;
+}
+
 #sidebar-content h3 {
   font-size: 14px;
   font-weight: 700;
@@ -135,6 +157,10 @@ html:not(.dark) #sidebar-content a[href]:not([href="/"]):hover {
 
 html:not(.dark) #sidebar-content h3 {
   color: var(--light-text) !important;
+}
+
+.dark #sidebar-content h3 {
+  color: var(--dark-text) !important;
 }
 
 #search-bar-entry {
@@ -161,6 +187,11 @@ html:not(.dark) #search-bar-entry:hover {
 html:not(.dark) #theme-preference-menu-trigger {
   color: var(--light-muted) !important;
   background: var(--light-surface-muted) !important;
+}
+
+.dark #search-bar-entry,
+.dark #theme-preference-menu-trigger {
+  color: var(--dark-muted) !important;
 }
 
 #content {
@@ -196,6 +227,24 @@ html:not(.dark) #content th {
   color: var(--light-text) !important;
 }
 
+.dark #content-area h1,
+.dark #content h1,
+.dark #content-area h2,
+.dark #content h2,
+.dark #content-area h3,
+.dark #content h3,
+.dark #content strong,
+.dark #content th {
+  color: var(--dark-text) !important;
+}
+
+.dark #content,
+.dark #content p,
+.dark #content li,
+.dark #header > div[class~="prose"] {
+  color: var(--dark-muted) !important;
+}
+
 html:not(.dark) #content a {
   text-decoration-color: var(--light-accent);
 }
@@ -204,6 +253,10 @@ html:not(.dark) #content a {
   font-size: 14px;
   font-weight: 400;
   line-height: 20px;
+}
+
+.dark #navbar-transition-maple .nav-tabs-item {
+  color: var(--dark-muted) !important;
 }
 
 #content-area h1,
@@ -249,6 +302,11 @@ html:not(.dark) #content-area button[aria-label="More actions"] {
   border-color: var(--light-border) !important;
 }
 
+.dark #content-area #page-context-menu-button,
+.dark #content-area button[aria-label="More actions"] {
+  color: var(--dark-muted) !important;
+}
+
 #content-area button[aria-label="More actions"] {
   min-height: 34px;
   min-width: 34px;
@@ -274,6 +332,10 @@ html:not(.dark) #content code {
   color: #000000;
   background: var(--light-surface-muted);
   border-color: var(--light-border);
+}
+
+.dark #content code {
+  color: var(--dark-muted);
 }
 
 html:not(.dark) #content table,
@@ -310,6 +372,15 @@ html:not(.dark) #table-of-contents a {
 html:not(.dark) #table-of-contents a:hover,
 html:not(.dark) #table-of-contents a[class*="text-primary"] {
   color: var(--light-accent) !important;
+}
+
+.dark #table-of-contents h2,
+.dark #table-of-contents button {
+  color: var(--dark-text) !important;
+}
+
+.dark #table-of-contents a {
+  color: var(--dark-muted) !important;
 }
 
 #content pre {
