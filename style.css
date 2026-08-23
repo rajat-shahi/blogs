@@ -15,6 +15,10 @@
   --dark-muted: #f1f3f5;
 }
 
+html[data-reading-font="serif"] {
+  --reactor-font-family: Georgia, "Times New Roman", serif;
+}
+
 body,
 #sidebar,
 #content-area,
@@ -171,6 +175,134 @@ html:not(.dark) #sidebar-content h3 {
   font-size: 14px;
   font-weight: 400;
   line-height: 24px;
+}
+
+.font-preference-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#font-preference-control {
+  position: relative;
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
+  font-family: var(--reactor-font-family);
+}
+
+#font-preference-menu-trigger {
+  display: inline-flex;
+  width: 36px;
+  height: 36px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1;
+  transition: border-color 120ms ease, background-color 120ms ease;
+}
+
+#font-preference-menu-trigger[data-font="serif"] span {
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+#font-preference-menu {
+  position: absolute;
+  top: 44px;
+  right: 0;
+  z-index: 60;
+  width: 156px;
+  padding: 4px;
+  border: 1px solid var(--light-border);
+  border-radius: 8px;
+  background: var(--light-surface);
+  box-shadow: 0 10px 28px rgb(15 23 42 / 0.14);
+}
+
+#font-preference-menu[hidden] {
+  display: none;
+}
+
+#font-preference-menu [role="option"] {
+  position: relative;
+  display: grid;
+  width: 100%;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  color: var(--light-text);
+  font-size: 14px;
+  line-height: 20px;
+  text-align: left;
+}
+
+#font-preference-menu [role="option"]:hover,
+#font-preference-menu [role="option"][aria-selected="true"] {
+  background: var(--light-surface-muted);
+}
+
+#font-preference-menu [role="option"][aria-selected="true"]::before {
+  content: "✓";
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  color: var(--light-accent);
+  font-weight: 700;
+  transform: translateY(-50%);
+}
+
+#font-preference-menu [role="option"] small {
+  margin-right: 18px;
+  color: #4b5563;
+  font-size: 11px;
+}
+
+html:not(.dark) #font-preference-menu-trigger {
+  color: var(--light-text);
+  background: var(--light-surface);
+  border-color: var(--light-border);
+}
+
+html:not(.dark) #font-preference-menu-trigger:hover,
+html:not(.dark) #font-preference-control[data-open="true"] #font-preference-menu-trigger {
+  background: var(--light-surface-muted);
+  border-color: #aebbc4;
+}
+
+.dark #font-preference-menu-trigger {
+  color: var(--dark-text);
+  background: rgb(255 255 255 / 0.04);
+  border-color: rgb(255 255 255 / 0.14);
+}
+
+.dark #font-preference-menu-trigger:hover,
+.dark #font-preference-control[data-open="true"] #font-preference-menu-trigger {
+  background: rgb(255 255 255 / 0.1);
+  border-color: rgb(255 255 255 / 0.24);
+}
+
+.dark #font-preference-menu {
+  border-color: rgb(255 255 255 / 0.14);
+  background: #151515;
+  box-shadow: 0 12px 32px rgb(0 0 0 / 0.4);
+}
+
+.dark #font-preference-menu [role="option"] {
+  color: var(--dark-text);
+}
+
+.dark #font-preference-menu [role="option"]:hover,
+.dark #font-preference-menu [role="option"][aria-selected="true"] {
+  background: rgb(255 255 255 / 0.09);
+}
+
+.dark #font-preference-menu [role="option"] small {
+  color: var(--dark-muted);
 }
 
 html:not(.dark) #search-bar-entry {
