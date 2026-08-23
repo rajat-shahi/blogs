@@ -7,8 +7,8 @@
   --light-canvas: #f6f8fa;
   --light-surface: #ffffff;
   --light-surface-muted: #eef2f5;
-  --light-text: #111111;
-  --light-muted: #30363b;
+  --light-text: #000000;
+  --light-muted: #000000;
   --light-border: #d8e0e6;
   --light-accent: #3f716a;
 }
@@ -271,7 +271,7 @@ html:not(.dark) #content-area button[aria-label="More actions"] {
 }
 
 html:not(.dark) #content code {
-  color: #202428;
+  color: #000000;
   background: var(--light-surface-muted);
   border-color: var(--light-border);
 }
