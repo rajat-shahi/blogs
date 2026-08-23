@@ -39,32 +39,44 @@ body,
   border-right-color: rgb(255 255 255 / 0.07);
 }
 
-#sidebar-content > div:first-child > a[href="/"] {
+#sidebar-content a[href="/"] {
   display: inline-flex;
   width: auto;
-  max-width: calc(100% - 6rem);
+  max-width: calc(100% - 3.5rem);
   align-items: center;
-  gap: 0.625rem;
+  gap: 0.5rem;
+  position: relative;
+  z-index: 2;
   font-size: 0;
   line-height: 1;
+  overflow: visible;
 }
 
-#sidebar-content > div:first-child > a[href="/"]::after {
+#sidebar-content a[href="/"]::after {
   content: "Rajat's Engineering Blog";
+  display: block;
+  flex: 0 1 8rem;
   min-width: 0;
-  color: currentColor;
-  font-size: 16px;
+  color: #1f2937 !important;
+  font-size: 15px;
   font-weight: 700;
-  line-height: 24px;
+  line-height: 20px;
+  opacity: 1;
+  visibility: visible;
   white-space: normal;
 }
 
-#sidebar-content > div:first-child > a[href="/"] .nav-logo {
+#sidebar-content a[href="/"] .nav-logo {
   width: 2rem;
   height: 2rem;
+  flex: 0 0 2rem;
   border-radius: 0.5rem;
   object-fit: cover;
   padding: 0;
+}
+
+.dark #sidebar-content a[href="/"]::after {
+  color: #f3f4f6 !important;
 }
 
 #sidebar-content a[href]:not([href="/"]) {
