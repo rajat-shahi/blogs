@@ -3,14 +3,14 @@
   "theme": "maple",
   "name": "Rajat's Engineering Blog",
   "colors": {
-    "primary": "#555240",
-    "light": "#C7C099",
-    "dark": "#555240"
+    "primary": "#3F716A",
+    "light": "#B7CEC9",
+    "dark": "#315B56"
   },
   "background": {
     "decoration": "gradient",
     "color": {
-      "light": "#F5F4F0",
+      "light": "#F6F8FA",
       "dark": "#0A0A08"
     }
   },
