@@ -9,7 +9,7 @@ Redis is fast because its working dataset lives primarily in memory. That speed 
 This guide explains how to answer that question with Redis Memory Analyzer (RMA), including clustered deployments and a workflow that runs from an EC2 instance over SSH.
 
 <Warning>
-  RMA is a legacy community tool whose latest published work dates from 2020. Use its numbers as directional estimates, validate the workflow outside production first, and compare the result with current Redis and provider metrics.
+  RMA is a legacy tool. Prefer a maintained Redis client with verified TLS and provider-supported authentication for production. Use RMA for pattern estimates when you can run it on a dedicated administration host with a scoped, short-lived credential.
 </Warning>
 
 ## Start with the memory model
@@ -116,78 +116,58 @@ rma --help
 The help output should include `--ssl`.
 
 <Note>
-  The RMA CLI accepts a password but not an ACL username or a custom CA path. Deployments that require a non-default username, IAM-only authentication, or a private CA need an adapter or a different analysis tool.
+  RMA accepts a password for the default user. Use a client that supports your authentication method if the deployment requires a separate ACL username or IAM authentication.
 </Note>
 
-## Run a connection preflight
+## Verify the connection with a TLS tunnel
 
-Set connection details without writing the password into your shell history:
+The RMA version above relies on redis-py 5.x, whose default TLS configuration checks the certificate chain but can skip the hostname check. Use a loopback-only `stunnel` listener to verify both before sending credentials to a remote Redis server. Run the tunnel and commands on the same dedicated administration host.
+
+Install `stunnel4` on Debian or Ubuntu. Create `~/rma-tunnel.conf` with your Redis endpoint, port, and the CA bundle trusted for that endpoint. Use the provider's documented TLS server name for both `checkHost` and `sni`.
+
+```ini
+foreground = yes
+pid =
+
+[redis-rma]
+client = yes
+accept = 127.0.0.1:16379
+connect = redis.example.internal:6379
+CAfile = /etc/ssl/certs/ca-certificates.crt
+verifyChain = yes
+checkHost = redis.example.internal
+sni = redis.example.internal
+sslVersionMin = TLSv1.2
+```
+
+Set `CAfile` to your approved private CA bundle if the server uses a private CA. Start the tunnel as your normal user.
 
 ```bash
-export REDIS_HOST="redis.example.internal"
-export REDIS_PORT="6379"
+stunnel ~/rma-tunnel.conf
+```
+
+In a second shell, read the password without echoing it and test the connection through the loopback listener.
+
+```bash
 read -rsp "Redis password: " REDIS_PASSWORD
 echo
+
+REDISCLI_AUTH="$REDIS_PASSWORD" redis-cli -h 127.0.0.1 -p 16379 PING
+REDISCLI_AUTH="$REDIS_PASSWORD" redis-cli -h 127.0.0.1 -p 16379 INFO memory
+REDISCLI_AUTH="$REDIS_PASSWORD" redis-cli -h 127.0.0.1 -p 16379 DBSIZE
 ```
 
-Test DNS and TCP reachability first:
-
-```bash
-getent hosts "$REDIS_HOST"
-nc -vz "$REDIS_HOST" "$REDIS_PORT"
-```
-
-Then test the Redis protocol. Use the TLS form when encryption in transit is enabled.
-
-<CodeGroup>
-```bash TLS
-REDISCLI_AUTH="$REDIS_PASSWORD" redis-cli \
-  -h "$REDIS_HOST" \
-  -p "$REDIS_PORT" \
-  --tls \
-  PING
-```
-
-```bash Plain TCP
-REDISCLI_AUTH="$REDIS_PASSWORD" redis-cli \
-  -h "$REDIS_HOST" \
-  -p "$REDIS_PORT" \
-  PING
-```
-</CodeGroup>
-
-Expected output:
-
-```text
-PONG
-```
-
-Check the database and memory view before scanning:
-
-```bash
-REDISCLI_AUTH="$REDIS_PASSWORD" redis-cli \
-  -h "$REDIS_HOST" \
-  -p "$REDIS_PORT" \
-  --tls \
-  INFO memory
-
-REDISCLI_AUTH="$REDIS_PASSWORD" redis-cli \
-  -h "$REDIS_HOST" \
-  -p "$REDIS_PORT" \
-  --tls \
-  DBSIZE
-```
+Expect `PONG` from `PING`. If the TLS connection fails, verify the endpoint name and CA bundle before proceeding. Stop the tunnel and unset `REDIS_PASSWORD` when you finish.
 
 ## Use a progressive RMA workflow
 
-Begin with pattern discovery over a small sample:
+With the verified tunnel running, begin with pattern discovery over a small sample.
 
 ```bash
 rma \
-  --server "$REDIS_HOST" \
-  --port "$REDIS_PORT" \
+  --server 127.0.0.1 \
+  --port 16379 \
   --password "$REDIS_PASSWORD" \
-  --ssl \
   --db 0 \
   --limit 1000 \
   --behaviour scanner
@@ -197,10 +177,9 @@ Increase the sample only after checking service metrics:
 
 ```bash
 rma \
-  --server "$REDIS_HOST" \
-  --port "$REDIS_PORT" \
+  --server 127.0.0.1 \
+  --port 16379 \
   --password "$REDIS_PASSWORD" \
-  --ssl \
   --db 0 \
   --limit 10000 \
   --behaviour all
@@ -210,10 +189,9 @@ Target a namespace when you already have a suspect:
 
 ```bash
 rma \
-  --server "$REDIS_HOST" \
-  --port "$REDIS_PORT" \
+  --server 127.0.0.1 \
+  --port 16379 \
   --password "$REDIS_PASSWORD" \
-  --ssl \
   --match "session:*" \
   --type hash \
   --behaviour ram
@@ -226,147 +204,35 @@ umask 077
 mkdir -p ~/rma-output
 
 rma \
-  --server "$REDIS_HOST" \
-  --port "$REDIS_PORT" \
+  --server 127.0.0.1 \
+  --port 16379 \
   --password "$REDIS_PASSWORD" \
-  --ssl \
   --limit 10000 \
   --format json \
   > "$HOME/rma-output/report-$(date +%Y%m%d-%H%M%S).json"
 ```
 
 <Warning>
-  RMA passes the password as a process argument. Another sufficiently privileged user on the same machine may be able to see it while the process runs. Use a dedicated administration host, a short-lived credential where supported, and remove the variable with `unset REDIS_PASSWORD` after the run.
+  RMA takes the expanded password as a process argument, where local processes with sufficient access can read it while RMA is running. For routine production reporting, use a maintained tool that accepts credentials without placing them in the process arguments. For an RMA run, use a dedicated administration host and a scoped, short-lived credential.
 </Warning>
 
 ## Example: Redis Enterprise cluster
 
-Redis Enterprise Software places a proxy in front of database shards. A standard database endpoint routes commands to the correct shard, so a non-cluster-aware client can use one host and port.
+A standard Redis Enterprise database endpoint proxies requests to its shards. Configure the verified tunnel for the database hostname and TLS port. Use the database's trusted CA bundle, then preflight the connection and run the sample through the tunnel.
 
-Assume this example database endpoint:
-
-```text
-redis-db.internal.example.com:12000
-```
-
-Test the endpoint:
-
-```bash
-export REDIS_HOST="redis-db.internal.example.com"
-export REDIS_PORT="12000"
-read -rsp "Redis password: " REDIS_PASSWORD
-echo
-
-REDISCLI_AUTH="$REDIS_PASSWORD" redis-cli \
-  -h "$REDIS_HOST" \
-  -p "$REDIS_PORT" \
-  --tls \
-  --cacert /etc/ssl/redis/proxy_cert.pem \
-  PING
-```
-
-If the certificate is already trusted by the operating system, run RMA directly:
-
-```bash
-rma \
-  -s "$REDIS_HOST" \
-  -p "$REDIS_PORT" \
-  -a "$REDIS_PASSWORD" \
-  --ssl \
-  -l 5000 \
-  -b all
-```
-
-If the database has the **OSS Cluster API** enabled, do not assume the first endpoint covers every shard. Discover the primary endpoints with a cluster-aware client and run RMA against each primary, just as you would for AWS cluster mode or Azure's OSS policy.
-
-### Handle a private CA
-
-RMA has no `--cacert` option. If Redis Enterprise uses a private or self-signed CA, terminate TLS locally with `stunnel` and point RMA at the local plaintext port.
-
-```bash
-sudo apt-get install -y stunnel4
-```
-
-Create `~/rma-stunnel.conf`:
-
-```ini
-client = yes
-foreground = yes
-
-[redis-rma]
-accept = 127.0.0.1:16379
-connect = redis-db.internal.example.com:12000
-CAfile = /etc/ssl/redis/proxy_cert.pem
-verifyChain = yes
-checkHost = redis-db.internal.example.com
-```
-
-Start `stunnel` in one SSH session:
-
-```bash
-stunnel ~/rma-stunnel.conf
-```
-
-Run RMA from a second session without `--ssl` because the local tunnel handles TLS:
-
-```bash
-rma \
-  -s 127.0.0.1 \
-  -p 16379 \
-  -a "$REDIS_PASSWORD" \
-  -l 5000 \
-  -b all
-```
+If the database uses the **OSS Cluster API**, discover the primary endpoints with a cluster-aware client. Configure and verify a separate tunnel for each primary before collecting its report.
 
 ## Example: AWS ElastiCache for Redis OSS
 
-ElastiCache normally lives in private VPC subnets. Run RMA from an EC2 instance that can resolve the endpoint and whose security group is allowed to reach the cache port.
+Run the tunnel from an EC2 administration host that can resolve and reach the private cache endpoints. Check that encryption in transit is enabled on the cache.
 
 ### Cluster mode disabled
 
-A cluster-mode-disabled replication group has one primary shard. Use its **Primary Endpoint** for the scan.
-
-```bash
-export REDIS_HOST="my-cache.xxxxxx.ng.0001.use1.cache.amazonaws.com"
-export REDIS_PORT="6379"
-read -rsp "ElastiCache auth token: " REDIS_PASSWORD
-echo
-
-REDISCLI_AUTH="$REDIS_PASSWORD" redis-cli \
-  -h "$REDIS_HOST" \
-  -p "$REDIS_PORT" \
-  --tls \
-  PING
-
-rma \
-  -s "$REDIS_HOST" \
-  -p "$REDIS_PORT" \
-  -a "$REDIS_PASSWORD" \
-  --ssl \
-  -l 5000 \
-  -b all
-```
-
-Do not use the **Reader Endpoint**. It represents replicas, not a stable view of the primary keyspace for this workflow.
+Use the **Primary Endpoint** and its TLS port for the tunnel. The **Reader Endpoint** can distribute connections across replicas, which makes it unsuitable for a stable view of the primary keyspace.
 
 ### Cluster mode enabled
 
-The **Configuration Endpoint** lets a cluster-aware client discover the topology. RMA is not cluster-aware, so it must scan each primary node endpoint separately.
-
-First, confirm cluster connectivity:
-
-```bash
-export CONFIG_ENDPOINT="my-cache.xxxxxx.clustercfg.use1.cache.amazonaws.com"
-
-REDISCLI_AUTH="$REDIS_PASSWORD" redis-cli \
-  -h "$CONFIG_ENDPOINT" \
-  -p 6379 \
-  --tls \
-  -c \
-  CLUSTER SHARDS
-```
-
-Use the AWS CLI to list the current primary endpoint for every shard:
+Use the AWS CLI to list the current primary endpoint and port for each shard.
 
 ```bash
 aws elasticache describe-replication-groups \
@@ -375,97 +241,27 @@ aws elasticache describe-replication-groups \
   --output table
 ```
 
-Create one JSON report per primary:
+Point the verified tunnel at one primary at a time. Stop and restart it with the next primary's verified endpoint configuration before collecting another report. Save each JSON report under its shard ID and check service metrics after each small sample.
 
-```bash
-umask 077
-OUT_DIR="$HOME/rma-output/aws-$(date +%Y%m%d-%H%M%S)"
-mkdir -p "$OUT_DIR"
-
-while read -r SHARD HOST PORT; do
-  echo "Scanning shard $SHARD at $HOST:$PORT"
-  rma \
-    -s "$HOST" \
-    -p "$PORT" \
-    -a "$REDIS_PASSWORD" \
-    --ssl \
-    -l 5000 \
-    -f json \
-    > "$OUT_DIR/shard-$SHARD.json"
-done < <(
-  aws elasticache describe-replication-groups \
-    --replication-group-id my-cache \
-    --query 'ReplicationGroups[0].NodeGroups[].[NodeGroupId,PrimaryEndpoint.Address,PrimaryEndpoint.Port]' \
-    --output text
-)
-```
-
-Review service metrics after the sample. Remove `-l 5000` only when you are comfortable running a complete scan.
-
-<Note>
-  RMA accepts only a password. It cannot supply an ElastiCache ACL username or perform IAM authentication. Use a compatible default-user auth token for this specific workflow, or use `redis-cli --keystats` with supported authentication instead.
-</Note>
+For deployments that require IAM authentication or a named ACL user, use a compatible Redis client such as `redis-cli` with the provider-supported authentication method.
 
 ## Example: Azure Managed Redis
 
-Azure Managed Redis uses port `10000` for the initial endpoint and enables TLS by default. The correct workflow depends on the cluster policy.
+Azure Managed Redis uses port `10000` for the initial endpoint. Run the tunnel from an administration host that can reach the cache.
 
 ### Enterprise cluster policy
 
-The Enterprise policy presents a single proxy endpoint. RMA can treat it as one Redis endpoint.
-
-```bash
-export REDIS_HOST="mycache.eastus.redis.azure.net"
-export REDIS_PORT="10000"
-read -rsp "Azure Redis access key: " REDIS_PASSWORD
-echo
-
-REDISCLI_AUTH="$REDIS_PASSWORD" redis-cli \
-  -h "$REDIS_HOST" \
-  -p "$REDIS_PORT" \
-  --tls \
-  PING
-
-rma \
-  -s "$REDIS_HOST" \
-  -p "$REDIS_PORT" \
-  -a "$REDIS_PASSWORD" \
-  --ssl \
-  -l 5000 \
-  -b all
-```
-
-Run this from a host with network access to the cache, such as a VM in the connected virtual network or an administration host reached through VPN or peering.
+The Enterprise policy provides a proxy endpoint. Configure the verified tunnel for that hostname and port `10000`, then run the preflight and sample through the local listener.
 
 ### OSS cluster policy
 
-The OSS policy requires a cluster-aware client. The initial connection uses port `10000`, while direct shard connections use ports in the `85XX` range.
-
-Discover the current topology before every run:
+Use the verified tunnel to the initial endpoint to discover the topology.
 
 ```bash
-REDISCLI_AUTH="$REDIS_PASSWORD" redis-cli \
-  -h "$REDIS_HOST" \
-  -p 10000 \
-  --tls \
-  -c \
-  CLUSTER NODES
+REDISCLI_AUTH="$REDIS_PASSWORD" redis-cli -h 127.0.0.1 -p 16379 CLUSTER NODES
 ```
 
-For each line marked as a connected primary or `master`, record the advertised host and client port. Then run RMA separately against every primary:
-
-```bash
-rma \
-  -s "PRIMARY_HOST" \
-  -p "PRIMARY_PORT" \
-  -a "$REDIS_PASSWORD" \
-  --ssl \
-  -l 5000 \
-  -f json \
-  > "azure-primary-01.json"
-```
-
-Repeat the command for every primary. Do not permanently store the `85XX` ports in a script because Azure can change them when topology changes.
+Record the current primary endpoints and their advertised client ports. Reconfigure and restart the tunnel for each primary before scanning it. Use a certificate name documented by the provider for that endpoint. If the endpoint's identity cannot be verified, stop and use a supported cluster-aware client.
 
 ## Run RMA by SSHing into an EC2 instance
 
@@ -496,18 +292,7 @@ Follow the reproducible installation earlier in this guide. On Amazon Linux, use
 
 ### 4. Verify the route before scanning
 
-```bash
-getent hosts "$REDIS_HOST"
-nc -vz "$REDIS_HOST" "$REDIS_PORT"
-
-REDISCLI_AUTH="$REDIS_PASSWORD" redis-cli \
-  -h "$REDIS_HOST" \
-  -p "$REDIS_PORT" \
-  --tls \
-  PING
-```
-
-If DNS fails, inspect VPC DNS settings. If TCP fails, inspect security groups, network ACLs, routes, and the endpoint port. If `PING` fails after TCP succeeds, inspect TLS and authentication.
+Check DNS and TCP reachability from EC2 with `getent hosts "$REDIS_HOST"` and `nc -vz "$REDIS_HOST" "$REDIS_PORT"`, using the hostname and port in your tunnel configuration. Start the verified tunnel and run the loopback `PING` preflight. If DNS or TCP fails, check VPC DNS, security groups, network ACLs, routes, and the endpoint port. If the preflight fails after TCP succeeds, check TLS verification and authentication.
 
 ### 5. Keep the run alive safely
 
@@ -569,27 +354,18 @@ Do not use RMA's estimate as a replacement for `used_memory`, `used_memory_rss`,
 
 ## Cross-check with current Redis tooling
 
-Run a current Redis CLI report against the same endpoint or each primary shard:
+Use `redis-cli` through the verified tunnel to report on the same endpoint or each primary shard. The credential is supplied via the environment.
 
 ```bash
 REDISCLI_AUTH="$REDIS_PASSWORD" redis-cli \
-  -h "$REDIS_HOST" \
-  -p "$REDIS_PORT" \
-  --tls \
+  -h 127.0.0.1 \
+  -p 16379 \
   --keystats \
   --top 20 \
   -i 0.1
 ```
 
-Useful alternatives:
-
-```bash
-redis-cli --memkeys
-redis-cli --bigkeys
-redis-cli --scan --pattern "session:*"
-```
-
-Use `-i 0.1` to introduce a short pause per batch when supported. These tools still scan the keyspace, so apply the same production caution.
+To run a different report, replace the report flags with `--memkeys`, `--bigkeys`, or `--scan --pattern "session:*"`. Use `-i 0.1` to introduce a short pause per batch when supported. These tools still scan the keyspace, so apply the same production precautions.
 
 ## Troubleshooting
 
@@ -603,7 +379,7 @@ The scan is crossing Redis Cluster hash slots. Connect directly to one primary s
 
 ### TLS certificate verification fails
 
-Confirm the hostname matches the certificate and that the CA is trusted by the operating system. For a private Redis Enterprise CA, use the verified `stunnel` pattern shown earlier.
+Confirm that the configured `checkHost` matches the Redis server certificate and that `CAfile` contains the approved CA for the endpoint.
 
 ### `NOPERM` or an unknown-command error
 
@@ -627,7 +403,7 @@ Check the following:
 
 - [ ] Identify the endpoint and cluster policy.
 - [ ] Enumerate all primary shards for OSS-style clusters.
-- [ ] Confirm DNS, TCP, TLS, and authentication from the analysis host.
+- [ ] Confirm DNS, TCP, verified TLS, and authentication from the analysis host.
 - [ ] Record baseline CPU, latency, command rate, and memory.
 - [ ] Run `--limit 1000` first.
 - [ ] Save one report per primary shard.
@@ -639,6 +415,7 @@ Check the following:
 
 - [Redis Memory Analyzer source](https://github.com/gamenet/redis-memory-analyzer)
 - [RMA package information](https://pypi.org/project/rma/)
+- [stunnel server certificate verification](https://www.stunnel.org/auth.html)
 - [Redis CLI memory analysis](https://redis.io/docs/latest/develop/tools/cli/)
 - [Redis `SCAN` command behavior](https://redis.io/docs/latest/commands/scan/)
 - [Redis Enterprise proxy policies](https://redis.io/docs/latest/operate/rs/databases/configure/proxy-policy/)

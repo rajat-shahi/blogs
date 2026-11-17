@@ -4,7 +4,7 @@ A personal engineering blog built with [Mintlify](https://mintlify.com). It
 contains practical notes, long-form articles, projects, and learning goals
 across software engineering, infrastructure, distributed systems, and AI.
 
-The source repository is private and hosted at
+The public source repository is hosted at
 [`rajat-shahi/blogs`](https://github.com/rajat-shahi/blogs).
 
 ## Content areas
@@ -90,11 +90,10 @@ on that section landing page.
 
 ## Publish through GitHub and Mintlify
 
-Mintlify watches the `main` branch of `rajat-shahi/blogs` and reads
-`docs.json` from the repository root. Commit article and navigation changes,
-then push them to `main` or merge a pull request into `main`.
+Open a pull request against `main` for article, navigation, and site changes.
+GitHub Actions validates the Mintlify build and checks links before merge.
 
-Mintlify automatically builds and deploys the update to
+Mintlify reads `docs.json` from the repository root and deploys merged changes to
 [blogs.rajatshahi.xyz](https://blogs.rajatshahi.xyz/).
 
 ## Writing conventions
