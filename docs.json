@@ -59,6 +59,51 @@
             ]
           },
           {
+            "group": "ENOUGH PYTHON FOR AI ENGINEERING",
+            "icon": "code",
+            "pages": [
+              "enough-python-for-ai-engineering/overview",
+              "enough-python-for-ai-engineering/learning-checklist",
+              {
+                "group": "Python fundamentals",
+                "pages": [
+                  "enough-python-for-ai-engineering/basics",
+                  "enough-python-for-ai-engineering/data-structures",
+                  "enough-python-for-ai-engineering/building-programs",
+                  "enough-python-for-ai-engineering/error-handling",
+                  "enough-python-for-ai-engineering/classes"
+                ]
+              },
+              {
+                "group": "Working with code",
+                "pages": [
+                  "enough-python-for-ai-engineering/organising-code-into-modules",
+                  "enough-python-for-ai-engineering/practical-python",
+                  "enough-python-for-ai-engineering/external-tools",
+                  "enough-python-for-ai-engineering/git-and-github"
+                ]
+              },
+              {
+                "group": "Dependencies and configuration",
+                "pages": [
+                  "enough-python-for-ai-engineering/virtual-environments",
+                  "enough-python-for-ai-engineering/requirements",
+                  "enough-python-for-ai-engineering/uv",
+                  "enough-python-for-ai-engineering/ruff",
+                  "enough-python-for-ai-engineering/environment-variables-and-secrets"
+                ]
+              },
+              {
+                "group": "APIs and data",
+                "pages": [
+                  "enough-python-for-ai-engineering/working-with-api",
+                  "enough-python-for-ai-engineering/pandas-basics",
+                  "enough-python-for-ai-engineering/working-with-data"
+                ]
+              }
+            ]
+          },
+          {
             "group": "Other Learnings",
             "icon": "book-open",
             "pages": [
