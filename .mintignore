@@ -5,3 +5,8 @@
 # Draft content
 drafts/
 *.draft.mdx
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
