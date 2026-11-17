@@ -59,56 +59,6 @@
             ]
           },
           {
-            "group": "Frontend Engineering",
-            "icon": "monitor",
-            "pages": [
-              "frontend-engineering/overview"
-            ]
-          },
-          {
-            "group": "Backend Engineering",
-            "icon": "server",
-            "pages": [
-              "backend-engineering/overview"
-            ]
-          },
-          {
-            "group": "Full Stack Engineering",
-            "icon": "layers",
-            "pages": [
-              "fullstack-engineering/overview"
-            ]
-          },
-          {
-            "group": "Site Reliability Engineering",
-            "icon": "activity",
-            "pages": [
-              "sre/overview"
-            ]
-          },
-          {
-            "group": "DevOps Engineering",
-            "icon": "infinity",
-            "pages": [
-              "devops-engineering/overview",
-              "devops-engineering/linux-basics"
-            ]
-          },
-          {
-            "group": "AI Engineering",
-            "icon": "brain-circuit",
-            "pages": [
-              "ai-engineering/overview"
-            ]
-          },
-          {
-            "group": "MLOps/AIOps",
-            "icon": "workflow",
-            "pages": [
-              "mlops-aiops/overview"
-            ]
-          },
-          {
             "group": "Other Learnings",
             "icon": "book-open",
             "pages": [

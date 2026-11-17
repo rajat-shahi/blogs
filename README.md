@@ -11,9 +11,6 @@ The source repository is private and hosted at
 
 - System design
 - Competitive programming and data structures
-- Frontend, backend, and full-stack engineering
-- Site reliability and DevOps engineering
-- AI engineering and MLOps/AIOps
 - Projects and experiments
 - Roadmap and learning goals
 - Other technical learnings
@@ -28,13 +25,6 @@ The source repository is private and hosted at
 |-- logo/                             # Logo and favicon assets
 |-- system-design/                    # System design articles
 |-- dsa/                              # DSA and competitive programming articles
-|-- frontend-engineering/             # Frontend articles
-|-- backend-engineering/              # Backend articles
-|-- fullstack-engineering/            # Full-stack articles
-|-- sre/                              # Reliability engineering articles
-|-- devops-engineering/               # DevOps and Linux articles
-|-- ai-engineering/                   # AI engineering articles
-|-- mlops-aiops/                      # MLOps and AIOps articles
 |-- other-learnings/                  # Articles outside the main categories
 |-- projects/                         # Project and tinkering write-ups
 `-- roadmap/                          # Learning plans and progress
