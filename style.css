@@ -132,42 +132,24 @@ html:not(.dark) #navbar-transition-maple {
 
 #sidebar-content a[href="/"] {
   display: inline-flex;
-  width: auto;
-  max-width: calc(100% - 3.5rem);
+  width: min(11.5rem, calc(100% - 3.5rem));
   align-items: center;
-  gap: 0.5rem;
   position: relative;
   z-index: 2;
-  font-size: 0;
-  line-height: 1;
-  overflow: visible;
 }
 
-#sidebar-content a[href="/"]::after {
-  content: "Rajat's Engineering Blog";
-  display: block;
-  flex: 0 1 8rem;
-  min-width: 0;
-  color: var(--light-text) !important;
-  font-size: 15px;
-  font-weight: 700;
-  line-height: 20px;
-  opacity: 1;
-  visibility: visible;
-  white-space: normal;
-}
-
-#sidebar-content a[href="/"] .nav-logo {
-  width: 2rem;
-  height: 2rem;
-  flex: 0 0 2rem;
-  border-radius: 0.5rem;
-  object-fit: cover;
+.nav-logo {
+  width: 11.5rem;
+  max-width: 100%;
+  height: auto;
+  aspect-ratio: 6 / 1;
   padding: 0;
+  object-fit: cover;
 }
 
-.dark #sidebar-content a[href="/"]::after {
-  color: var(--dark-text) !important;
+.dark .nav-logo {
+  background: var(--light-canvas);
+  border-radius: 0.25rem;
 }
 
 #sidebar-content a[href]:not([href="/"]) {

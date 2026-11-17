@@ -1,4 +1,4 @@
-# Rajat's Engineering Blog
+# AGENCORD LABS
 
 A personal engineering blog built with [Mintlify](https://mintlify.com). It
 contains practical notes, long-form articles, projects, and learning goals
