@@ -37,9 +37,7 @@ The source repository is private and hosted at
 |-- mlops-aiops/                      # MLOps and AIOps articles
 |-- other-learnings/                  # Articles outside the main categories
 |-- projects/                         # Project and tinkering write-ups
-|-- roadmap/                          # Learning plans and progress
-|-- scripts/build-sites.sh            # Production export for Sites hosting
-`-- sites/                             # Cloudflare-compatible Sites worker
+`-- roadmap/                          # Learning plans and progress
 ```
 
 ## Run locally
@@ -102,37 +100,12 @@ on that section landing page.
 
 ## Publish through GitHub and Mintlify
 
-The recommended publishing flow uses the Mintlify GitHub App:
+Mintlify watches the `main` branch of `rajat-shahi/blogs` and reads
+`docs.json` from the repository root. Commit article and navigation changes,
+then push them to `main` or merge a pull request into `main`.
 
-1. Connect the private `rajat-shahi/blogs` repository in the Mintlify
-   dashboard.
-2. Set `main` as the deployment branch and leave the documentation
-   subdirectory empty.
-3. Install the Mintlify GitHub App with access only to this repository.
-4. Commit the article and its `docs.json` navigation entry.
-5. Push to `main`.
-
-```bash
-git add path/to/article.mdx docs.json
-git commit -m "Add article title"
-git push
-```
-
-Mintlify detects the push, validates the project, and deploys the new version.
-Pull requests can be used to review articles before they reach the deployment
-branch.
-
-## Sites build
-
-The repository also contains the existing Sites hosting adapter. Build its
-deployment output with:
-
-```bash
-./scripts/build-sites.sh
-```
-
-This validates the Mintlify project, exports the static pages, and creates the
-Cloudflare-compatible worker bundle under `dist/`.
+Mintlify automatically builds and deploys the update to
+[blogs.rajatshahi.xyz](https://blogs.rajatshahi.xyz/).
 
 ## Writing conventions
 
